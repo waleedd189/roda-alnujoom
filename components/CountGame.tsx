@@ -46,7 +46,7 @@ export default function CountGame({ items, onComplete }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-5 pb-6">
-      <ProgressBar current={index} total={total} />
+      <ProgressBar current={index + 1} total={total} />
 
       <p className="text-xl font-bold text-gray-800">احسب الصور كام؟</p>
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { FlashCardItem } from "@/types";
 import SpeakButton from "./SpeakButton";
@@ -16,46 +16,50 @@ export default function FlashCard({ items, onComplete }: Props) {
   const [flipped, setFlipped] = useState(false);
   const [seen,    setSeen]    = useState<Set<number>>(new Set([0]));
 
-  const item  = items[index]!;
-  const total = items.length;
+  const total  = items.length;
+  const item   = items[index];
+  const isDone = index >= total;
 
   // ── Auto-speak main text when card changes ────
   useEffect(() => {
+    if (!item || isDone) return;
+
     const timer = setTimeout(() => {
       speakAuto(item.main);
     }, 400); // delay بسيط عشان الكارد يتلود الأول
     return () => clearTimeout(timer);
-  }, [index, item.main]);
+  }, [index, item, isDone]);
 
   // ── Auto-speak sub text when card is flipped ──
   useEffect(() => {
-    if (!flipped) return;
+    if (!flipped || !item || isDone) return;
+
     const timer = setTimeout(() => {
       speak(item.sub, detectLang(item.sub));
     }, 300);
     return () => clearTimeout(timer);
-  }, [flipped, item.sub]);
+  }, [flipped, item, isDone]);
 
   const go = (dir: 1 | -1) => {
     const next = index + dir;
     if (next < 0 || next > total) return;
     setIndex(next);
     setFlipped(false);
-    setSeen((prev) => new Set([...prev, next]));
+    if (next < total) {
+      setSeen((prev) => new Set([...Array.from(prev), next]));
+    }
   };
 
   const handleFlip = () => {
     setFlipped((f) => !f);
   };
 
-  const isDone = index === total;
-
-  if (isDone) {
+  if (isDone || !item) {
     return (
       <div className="flex flex-col items-center gap-5 py-10 text-center">
         <span className="text-8xl animate-spin-once">🏆</span>
         <h2 className="text-2xl font-black text-brand-purple">أحسنت! خلصت الدرس</h2>
-        <p className="text-gray-500">شفت {seen.size - 1} من {total} بطاقة</p>
+        <p className="text-gray-500">شفت {seen.size} من {total} بطاقة</p>
         <button
           onClick={() => onComplete(3)}
           className="mt-2 px-8 py-3 bg-brand-purple text-white rounded-3xl font-bold text-lg active:scale-95 transition-transform"
@@ -68,7 +72,7 @@ export default function FlashCard({ items, onComplete }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-4 pb-6">
-      <ProgressBar current={index} total={total} />
+      <ProgressBar current={Math.min(index + 1, total)} total={total} />
 
       {/* Card */}
       <button
