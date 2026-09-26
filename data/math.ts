@@ -148,6 +148,42 @@ const lessons: Lesson[] = [
       { question: "ما أكبر؟", icon: "📊", options: ["١/٤", "١/٢", "١/٣", "كلهم متساوين"], correctIndex: 1, explanation: "١/٢ = ٥٠٪ هي الأكبر" },
     ],
   },
+
+  // ── Level 2 · Age 7-8 ───────────────────────
+  {
+    id: "math-time-and-money",
+    name: "الوقت والنقود",
+    description: "تعرف على الساعة والعملات",
+    icon: "⏰",
+    type: "flashcard",
+    level: 2,
+    ageMin: 7,
+    data: [
+      { emoji: "🕐", main: "الساعة ١", sub: "الساعة الواحدة", color: "#FEF08A", example: "أستيقظ الساعة السابعة" },
+      { emoji: "🕒", main: "الساعة ٣", sub: "الساعة الثالثة", color: "#BFDBFE", example: "موعد الدرس الساعة الثالثة" },
+      { emoji: "🕕", main: "الساعة ٦", sub: "الساعة السادسة", color: "#DDD6FE", example: "نتعشى الساعة السادسة" },
+      { emoji: "🪙", main: "جنيه", sub: "عملة مصرية", color: "#FEF3C7", example: "معي جنيه واحد" },
+      { emoji: "💰", main: "نقود", sub: "نستخدمها للشراء", color: "#A7F3D0", example: "أحافظ على نقودي" },
+    ],
+  },
+
+  // ── Level 3 · Age 9-12 ──────────────────────
+  {
+    id: "math-division-quiz",
+    name: "اختبار القسمة",
+    description: "تدرّب على القسمة البسيطة",
+    icon: "➗",
+    type: "quiz",
+    level: 3,
+    ageMin: 9,
+    data: [
+      { question: "١٢ ÷ ٣ = ؟", icon: "➗", options: ["٣", "٤", "٥", "٦"], correctIndex: 1, explanation: "١٢ مقسومة على ٣ تساوي ٤" },
+      { question: "٢٠ ÷ ٥ = ؟", icon: "➗", options: ["٢", "٣", "٤", "٥"], correctIndex: 2 },
+      { question: "١٥ ÷ ٣ = ؟", icon: "➗", options: ["٤", "٥", "٦", "٧"], correctIndex: 1 },
+      { question: "١٨ ÷ ٢ = ؟", icon: "➗", options: ["٧", "٨", "٩", "١٠"], correctIndex: 2 },
+      { question: "٢٤ ÷ ٤ = ؟", icon: "➗", options: ["٤", "٥", "٦", "٨"], correctIndex: 2, explanation: "أربع مجموعات متساوية من ٢٤ = ٦ في كل مجموعة" },
+    ],
+  },
 ];
 
 export const mathSubject: Subject = {
@@ -157,6 +193,6 @@ export const mathSubject: Subject = {
   subtitle: "أرقام، جمع، طرح وضرب",
   icon: "🔢",
   color: "from-emerald-500 to-cyan-500",
-  headerClass: "bg-gradient-to-br from-emerald-500 to-cyan-500",
+  headerClass: "bg-gradient-to-br from-emerald-700 via-teal-700 to-cyan-800",
   lessons,
 };

@@ -192,6 +192,51 @@ const lessons: Lesson[] = [
       { question: "من نزلت فيه سورة الضحى؟", icon: "🌤️", options: ["موسى", "عيسى", "إبراهيم", "محمد ﷺ"], correctIndex: 3, explanation: "نزلت تطمئن النبي محمداً ﷺ" },
     ],
   },
+
+  // ── Level 2 · مراجعة السور والأدعية ─────────
+  {
+    id: "qr-quiz-suras-and-duas",
+    name: "اختبار: السور والأدعية",
+    description: "راجع ما تعلمته في القرآن والدين",
+    icon: "❓",
+    type: "quiz",
+    level: 2,
+    ageMin: 7,
+    data: [
+      {
+        question: "ما أول سورة في المصحف؟",
+        icon: "📖",
+        options: ["الفاتحة", "الناس", "الإخلاص", "الكوثر"],
+        correctIndex: 0,
+      },
+      {
+        question: "كم عدد آيات سورة الكوثر؟",
+        icon: "💧",
+        options: ["آيتان", "٤ آيات", "٣ آيات", "٥ آيات"],
+        correctIndex: 2,
+        explanation: "سورة الكوثر أقصر سور القرآن، وعدد آياتها ثلاث آيات",
+      },
+      {
+        question: "ماذا نقول قبل الأكل؟",
+        icon: "🍽️",
+        options: ["الحمد لله", "بسم الله", "تصبح على خير", "مع السلامة"],
+        correctIndex: 1,
+      },
+      {
+        question: "ماذا تعلمنا سورة العصر؟",
+        icon: "⏰",
+        options: ["النوم مبكراً", "أسماء الألوان", "أهمية الطعام", "الإيمان والعمل الصالح والصبر"],
+        correctIndex: 3,
+        explanation: "سورة العصر تذكر الإيمان والعمل الصالح والتواصي بالحق والصبر",
+      },
+      {
+        question: "ماذا نقول عند العطاس؟",
+        icon: "🤧",
+        options: ["الحمد لله", "بسم الله", "الله أكبر", "صباح الخير"],
+        correctIndex: 0,
+      },
+    ],
+  },
 ];
 
 export const quranSubject: Subject = {
@@ -201,6 +246,6 @@ export const quranSubject: Subject = {
   subtitle: "السور والأدعية والمعاني",
   icon: "🌙",
   color: "from-violet-600 to-purple-600",
-  headerClass: "bg-gradient-to-br from-violet-600 to-purple-600",
+  headerClass: "bg-gradient-to-br from-violet-800 via-purple-800 to-fuchsia-900",
   lessons,
 };
