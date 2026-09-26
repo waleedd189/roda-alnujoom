@@ -42,7 +42,7 @@ export default function FillGame({ items, onComplete }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-5 pb-6">
-      <ProgressBar current={index} total={total} />
+      <ProgressBar current={index + 1} total={total} />
 
       <p className="text-lg font-bold text-gray-700">اختار الكلمة الصح ✏️</p>
 

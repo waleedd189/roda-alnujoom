@@ -3,17 +3,32 @@
 @tailwind utilities;
 
 :root {
-  --font-tajawal: "Tajawal", sans-serif;
+  --font-tajawal: "Tajawal", "Segoe UI", Tahoma, Arial, sans-serif;
+  --surface: rgba(255, 255, 255, 0.82);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-tajawal), sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(196, 181, 253, 0.45), transparent 32rem),
+    radial-gradient(circle at bottom left, rgba(253, 224, 71, 0.28), transparent 28rem),
+    #fff9f0;
+}
+
+button,
+a {
+  touch-action: manipulation;
 }
 
 /* Custom animations */
@@ -35,14 +50,42 @@ body {
   75%       { transform: translateX(6px); }
 }
 
-.animate-spin-once  { animation: spin-once  0.6s ease-out forwards; }
-.animate-bounce-in  { animation: bounce-in  0.4s ease-out forwards; }
-.animate-shake      { animation: shake      0.35s ease-in-out; }
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
 
-/* Smooth scrolling */
-html { scroll-behavior: smooth; }
+@keyframes shine {
+  0%   { transform: translateX(120%) rotate(12deg); }
+  100% { transform: translateX(-140%) rotate(12deg); }
+}
+
+.animate-spin-once { animation: spin-once 0.6s ease-out forwards; }
+.animate-bounce-in { animation: bounce-in 0.4s ease-out forwards; }
+.animate-shake     { animation: shake 0.35s ease-in-out; }
+.animate-float     { animation: float-soft 3s ease-in-out infinite; }
+
+.glass-card {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 18px 50px rgba(124, 58, 237, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.shine-overlay::after {
+  content: "";
+  position: absolute;
+  inset: -40% auto -40% 0;
+  width: 52px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  animation: shine 4s ease-in-out infinite;
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
 
 /* Hide scrollbar on mobile for cleaner look */
-::-webkit-scrollbar         { width: 4px; }
-::-webkit-scrollbar-track   { background: transparent; }
-::-webkit-scrollbar-thumb   { background: #c4b5fd; border-radius: 2px; }
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 2px; }

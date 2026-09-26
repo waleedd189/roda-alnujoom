@@ -1,28 +1,27 @@
-import type { Metadata } from "next";
-import { Tajawal } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-
-const tajawal = Tajawal({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "700", "900"],
-  variable: "--font-tajawal",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "روضة النجوم — تعلم مع الفرح",
-  description: "تطبيق تعليمي للأطفال — عربي وإنجليزي ورياضيات وقرآن",
+  description: "تطبيق تعليمي تفاعلي للأطفال — عربي وإنجليزي ورياضيات وقرآن",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/icons/star.svg",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#7C3AED",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
-      <head>
-        <meta name="theme-color" content="#7C3AED" />
-        <link rel="icon" href="/favicon.ico" />
-      </head>
-      <body className={`${tajawal.variable} font-tajawal bg-[#FFF9F0] text-gray-800 min-h-screen`}>
+      <body className="font-tajawal bg-[#FFF9F0] text-gray-800 min-h-screen antialiased">
         {children}
       </body>
     </html>

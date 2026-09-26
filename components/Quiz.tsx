@@ -47,7 +47,7 @@ export default function Quiz({ items, onComplete }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-5 pb-6">
-      <ProgressBar current={index} total={total} />
+      <ProgressBar current={index + 1} total={total} />
 
       {/* Question */}
       <div className="text-6xl">{item.icon}</div>

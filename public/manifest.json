@@ -1,0 +1,21 @@
+{
+  "name": "روضة النجوم — Roda Al-Nujoom",
+  "short_name": "روضة النجوم",
+  "description": "تطبيق تعليمي تفاعلي للأطفال لتعلم العربية والإنجليزية والرياضيات والقرآن.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFF9F0",
+  "theme_color": "#7C3AED",
+  "icons": [
+    {
+      "src": "/icons/star.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

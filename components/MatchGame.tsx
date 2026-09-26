@@ -24,7 +24,6 @@ export default function MatchGame({ pairs, onComplete }: Props) {
   const [flash,    setFlash]     = useState<string | null>(null); // wrong flash value
 
   const handleClick = (side: Side, value: string) => {
-    const key = side === "left" ? value : value; // value is unique per side
     if (matched.has(value)) return;
 
     if (!selected) {
@@ -44,7 +43,7 @@ export default function MatchGame({ pairs, onComplete }: Props) {
     const isMatch  = pairs.some((p) => p.left === leftVal && p.right === rightVal);
 
     if (isMatch) {
-      const next = new Set([...matched, leftVal, rightVal]);
+      const next = new Set([...Array.from(matched), leftVal, rightVal]);
       setMatched(next);
       setSelected(null);
       if (next.size === pairs.length * 2) {
