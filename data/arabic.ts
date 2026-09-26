@@ -227,6 +227,71 @@ const lessons: Lesson[] = [
       },
     ],
   },
+
+  // ── Level 2 · كلمات جديدة ────────────────────
+  {
+    id: "ar-words-school",
+    name: "كلمات: المدرسة",
+    description: "أدوات ومكان المدرسة",
+    icon: "🏫",
+    type: "flashcard",
+    level: 2,
+    ageMin: 7,
+    data: [
+      { emoji: "🏫", main: "مَدرَسة", sub: "مكان التعلّم", color: "#BFDBFE", example: "أذهب إلى المدرسة كل صباح" },
+      { emoji: "📚", main: "كِتاب", sub: "نقرأ فيه", color: "#DDD6FE", example: "أفتح الكتاب وأقرأ" },
+      { emoji: "✏️", main: "قَلَم", sub: "نكتب به", color: "#FEF08A", example: "أكتب بالقلم" },
+      { emoji: "🎒", main: "حَقيبة", sub: "نضع فيها أدواتنا", color: "#A7F3D0", example: "حقيبتي مرتبة" },
+      { emoji: "🪑", main: "كُرسي", sub: "نجلس عليه", color: "#FED7AA", example: "جلست على الكرسي" },
+      { emoji: "👩‍🏫", main: "مُعلّمة", sub: "تساعدنا على التعلّم", color: "#FBCFE8", example: "المعلمة لطيفة" },
+    ],
+  },
+
+  // ── Level 3 · قواعد بسيطة ────────────────────
+  {
+    id: "ar-quiz-grammar-basics",
+    name: "اختبار: قواعد بسيطة",
+    description: "راجع الجمع والتذكير والتأنيث",
+    icon: "✍️",
+    type: "quiz",
+    level: 3,
+    ageMin: 9,
+    data: [
+      {
+        question: "الولدُ ___ إلى المدرسة.",
+        icon: "🏫",
+        options: ["ذهب", "ذهبت", "يذهبون", "اذهب"],
+        correctIndex: 0,
+        explanation: "الولد مفرد مذكر، والصحيح: ذهب إلى المدرسة",
+      },
+      {
+        question: "ما جمع كلمة «كتاب»؟",
+        icon: "📚",
+        options: ["كتابان", "كاتب", "كتب", "كتابة"],
+        correctIndex: 2,
+      },
+      {
+        question: "السماء ___ اليوم.",
+        icon: "🌤️",
+        options: ["جميل", "جميلة", "جمال", "جميلات"],
+        correctIndex: 1,
+        explanation: "السماء مؤنث، لذلك نقول: السماء جميلة",
+      },
+      {
+        question: "ما عكس كلمة «كبير»؟",
+        icon: "🐘",
+        options: ["طويل", "واسع", "صغير", "قوي"],
+        correctIndex: 2,
+      },
+      {
+        question: "أين جلستُ؟ جلستُ في ___.",
+        icon: "🪑",
+        options: ["البيتُ", "الفصلِ", "الحديقةَ", "المدرسةُ"],
+        correctIndex: 1,
+        explanation: "بعد حرف الجر «في» تأتي الكسرة: في الفصلِ",
+      },
+    ],
+  },
 ];
 
 export const arabicSubject: Subject = {
@@ -236,6 +301,6 @@ export const arabicSubject: Subject = {
   subtitle: "الحروف، الكلمات، والجمل",
   icon: "📖",
   color: "from-red-500 to-orange-500",
-  headerClass: "bg-gradient-to-br from-red-500 to-orange-500",
+  headerClass: "bg-gradient-to-br from-red-700 via-orange-700 to-amber-800",
   lessons,
 };

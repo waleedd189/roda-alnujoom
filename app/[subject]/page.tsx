@@ -68,18 +68,19 @@ function SubjectPageInner({ subject }: { subject: string }) {
 
   return (
     <div className="min-h-screen flex flex-col" dir="rtl">
-      <header className={`${subj.headerClass} relative overflow-hidden sticky top-0 z-50 shadow-lg`}>
+      <header className={`${subj.headerClass} subject-header relative overflow-hidden sticky top-0 z-50 shadow-lg`}>
+        <div className="absolute inset-0 bg-slate-950/20" aria-hidden="true" />
         <div className="absolute -top-16 -left-10 text-[10rem] opacity-10">{subj.icon}</div>
         <div className="max-w-5xl mx-auto px-4 pt-3 pb-6 relative z-10">
           <div className="flex items-center justify-between gap-3">
             <Link
               href={`/?age=${ageGroup}`}
-              className="inline-flex items-center gap-1 bg-white/20 text-white px-3 py-1.5 rounded-full text-sm font-bold hover:bg-white/30 transition-colors"
+              className="inline-flex items-center gap-1 bg-slate-950/25 text-white px-3 py-1.5 rounded-full text-sm font-bold ring-1 ring-white/30 hover:bg-slate-950/35 transition-colors"
             >
               <ChevronLeft size={16} />
               الرئيسية
             </Link>
-            <span className="rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold text-white">
+            <span className="rounded-full bg-slate-950/25 px-3 py-1.5 text-xs font-bold text-white ring-1 ring-white/30">
               {ageGroup} سنوات
             </span>
           </div>
@@ -88,26 +89,26 @@ function SubjectPageInner({ subject }: { subject: string }) {
             <div>
               <span className="text-5xl block animate-float">{subj.icon}</span>
               <h1 className="text-3xl sm:text-4xl font-black text-white mt-2">{subj.name}</h1>
-              <p className="text-white/85 text-sm sm:text-base mt-1">{subj.subtitle}</p>
+              <p className="text-white text-sm sm:text-base mt-1">{subj.subtitle}</p>
             </div>
 
             <div className="grid grid-cols-3 gap-2 min-w-72">
-              <div className="rounded-3xl bg-white/18 p-3 text-center text-white">
+              <div className="rounded-3xl bg-slate-950/25 p-3 text-center text-white ring-1 ring-white/20">
                 <p className="text-2xl font-black">{lessons.length}</p>
-                <p className="text-xs text-white/75">دروس</p>
+                <p className="text-xs text-white">دروس</p>
               </div>
-              <div className="rounded-3xl bg-white/18 p-3 text-center text-white">
+              <div className="rounded-3xl bg-slate-950/25 p-3 text-center text-white ring-1 ring-white/20">
                 <p className="text-2xl font-black">{completedCount}</p>
-                <p className="text-xs text-white/75">مكتمل</p>
+                <p className="text-xs text-white">مكتمل</p>
               </div>
-              <div className="rounded-3xl bg-white/18 p-3 text-center text-white">
+              <div className="rounded-3xl bg-slate-950/25 p-3 text-center text-white ring-1 ring-white/20">
                 <p className="text-2xl font-black">{earnedStars}</p>
-                <p className="text-xs text-white/75">نجوم</p>
+                <p className="text-xs text-white">نجوم</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 h-2.5 rounded-full bg-white/25 overflow-hidden">
+          <div className="mt-4 h-2.5 rounded-full bg-slate-950/30 overflow-hidden ring-1 ring-white/20">
             <div className="h-full rounded-full bg-yellow-300 transition-all duration-500" style={{ width: `${progressPct}%` }} />
           </div>
         </div>

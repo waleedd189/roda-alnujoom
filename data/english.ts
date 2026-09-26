@@ -223,6 +223,68 @@ const lessons: Lesson[] = [
       },
     ],
   },
+
+  // ── Level 2 · Age 7-8 ───────────────────────
+  {
+    id: "en-school-words",
+    name: "School Words",
+    description: "Useful words for the classroom",
+    icon: "🏫",
+    type: "flashcard",
+    level: 2,
+    ageMin: 7,
+    data: [
+      { emoji: "🏫", main: "School", sub: "مدرسة", color: "#BFDBFE", example: "I go to school every day." },
+      { emoji: "📚", main: "Book", sub: "كتاب", color: "#DDD6FE", example: "This is my book." },
+      { emoji: "✏️", main: "Pencil", sub: "قلم رصاص", color: "#FEF08A", example: "I write with a pencil." },
+      { emoji: "🪑", main: "Chair", sub: "كرسي", color: "#A7F3D0", example: "Please sit on the chair." },
+      { emoji: "👩‍🏫", main: "Teacher", sub: "معلّمة", color: "#FBCFE8", example: "My teacher helps me learn." },
+      { emoji: "🎒", main: "Bag", sub: "حقيبة", color: "#FED7AA", example: "My bag is blue." },
+    ],
+  },
+  {
+    id: "en-quiz-daily-sentences",
+    name: "Quiz: Daily English",
+    description: "Practice simple everyday sentences",
+    icon: "💬",
+    type: "quiz",
+    level: 2,
+    ageMin: 7,
+    data: [
+      {
+        question: "She ___ happy today.",
+        icon: "😊",
+        options: ["am", "is", "are", "be"],
+        correctIndex: 1,
+        explanation: "We use is with she, he, and it.",
+      },
+      {
+        question: "They ___ playing outside.",
+        icon: "⚽",
+        options: ["is", "am", "are", "be"],
+        correctIndex: 2,
+      },
+      {
+        question: "Which word is a fruit?",
+        icon: "🍎",
+        options: ["Apple", "Chair", "Pencil", "School"],
+        correctIndex: 0,
+      },
+      {
+        question: "What is a polite answer to ‘Thank you’?",
+        icon: "🤝",
+        options: ["Good night", "You are welcome", "I am seven", "See you yesterday"],
+        correctIndex: 1,
+      },
+      {
+        question: "Choose the correct sentence:",
+        icon: "📖",
+        options: ["I likes books.", "I like books.", "I liking books.", "I likes book."],
+        correctIndex: 1,
+        explanation: "With I, use the base verb: I like.",
+      },
+    ],
+  },
 ];
 
 export const englishSubject: Subject = {
@@ -232,6 +294,6 @@ export const englishSubject: Subject = {
   subtitle: "Alphabet, Words & Sentences",
   icon: "🔤",
   color: "from-blue-500 to-indigo-500",
-  headerClass: "bg-gradient-to-br from-blue-500 to-indigo-500",
+  headerClass: "bg-gradient-to-br from-blue-700 via-indigo-700 to-indigo-900",
   lessons,
 };
