@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SettingsSheet from "@/components/SettingsSheet";
+import AudioUnlock from "@/components/AudioUnlock";
 
 export const metadata: Metadata = {
   title: "روضة النجوم — تعلم مع الفرح",
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-tajawal min-h-screen bg-[#FFF9F0] text-gray-800 antialiased dark:bg-slate-950 dark:text-gray-100">
         {children}
+        <AudioUnlock />
         <SettingsSheet />
       </body>
     </html>

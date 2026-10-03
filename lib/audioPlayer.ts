@@ -103,6 +103,52 @@ export function playSources(sources: string[], opts?: { rate?: number; volume?: 
   });
 }
 
+/**
+ * "فك قفل" الصوت: المتصفحات بتمنع تشغيل أي صوت قبل ما المستخدم
+ * يلمس الشاشة. بنشغّل ملف صامت جوه أول لمسة عشان بعد كده
+ * نقدر نشغّل الصوت برمجيًا (مهم جدًا على iPhone/Safari).
+ */
+const SILENT_WAV =
+  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=";
+
+let primed = false;
+
+export function primeAudio(): void {
+  if (primed || typeof window === "undefined") return;
+  primed = true;
+  const audio = getEl();
+  const prevVolume = audio.volume;
+  audio.muted = true;
+  audio.src = SILENT_WAV;
+  void audio
+    .play()
+    .catch(() => {
+      primed = false;
+    })
+    .finally(() => {
+      audio.pause();
+      audio.muted = false;
+      audio.volume = prevVolume;
+    });
+
+  // تهيئة محرك النطق كمان (Safari محتاج نداء جوه اللمسة)
+  if (window.speechSynthesis) {
+    try {
+      window.speechSynthesis.getVoices();
+      const u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+      window.speechSynthesis.cancel();
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+export function isAudioPrimed(): boolean {
+  return primed;
+}
+
 export function playUrl(url: string, opts?: { rate?: number; volume?: number }): Promise<void> {
   return playSources([url], opts);
 }

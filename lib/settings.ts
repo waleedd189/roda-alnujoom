@@ -20,6 +20,8 @@ export interface AppSettings {
   theme: "light" | "dark";
   /** عدد مرات تكرار الآية في وضع الحفظ */
   ayahRepeat: number;
+  /** استخدام محرك النطق المجاني (من غير مفتاح API) */
+  freeTts: boolean;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -29,6 +31,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   sfx: true,
   theme: "light",
   ayahRepeat: 2,
+  freeTts: true,
 };
 
 const KEY = "roda_settings_v1";

@@ -4,9 +4,10 @@
 //  محرك النطق — Roda Al-Nujoom
 //
 //  ترتيب المحاولات (أول واحد ينجح بيشتغل):
-//   1) ملف صوت مُسجّل جاهز في /public/audio  (أعلى جودة)
-//   2) /api/tts  → Google / Azure / ElevenLabs / OpenAI
-//   3) Web Speech API  (صوت المتصفح — حل أخير)
+//   1) ملف صوت مُسجّل جاهز في /public/audio      (أعلى جودة)
+//   2) /api/tts  → Google / Azure / ElevenLabs / OpenAI  (محتاج مفتاح)
+//   3) المحرك المجاني (Google Translate TTS)      (من غير أي مفتاح)
+//   4) Web Speech API  (صوت المتصفح — حل أخير)
 //
 //  + تصحيح نطق الحروف العربية قبل الإرسال لأي محرك.
 //  ❗ القرآن مالوش علاقة بالملف ده — بيتشغّل بصوت قارئ
@@ -29,9 +30,11 @@ export interface SayOptions {
   letterNameFirst?: boolean;
   /** منخليش التصحيح التلقائي للنص */
   raw?: boolean;
+  /** إجبار محرك معيّن (للفحص والتشخيص) */
+  engine?: SpeechEngine;
 }
 
-export type SpeechEngine = "file" | "api" | "browser" | "none";
+export type SpeechEngine = "file" | "api" | "free" | "browser" | "none";
 
 // ── هل /api/tts متاح؟ (بنسأل مرة واحدة ونكاش النتيجة) ──
 let providerPromise: Promise<{ enabled: boolean; provider: string }> | null = null;
@@ -52,7 +55,56 @@ export function detectLang(text: string): SpeechLang {
 }
 
 export function isSpeechAvailable(): boolean {
-  return typeof window !== "undefined" && ("speechSynthesis" in window || true);
+  return typeof window !== "undefined";
+}
+
+// ────────────────────────────────────────────────
+//  المحرك المجاني — Google Translate TTS
+//  الطلب بيخرج من متصفح الطفل مباشرة (مش من السيرفر)
+//  فمش محتاج أي مفتاح ولا إعداد.
+//  الحد الأقصى ~200 حرف للطلب، فبنقسّم النص.
+// ────────────────────────────────────────────────
+const FREE_TTS_ENDPOINTS = [
+  { host: "https://translate.googleapis.com", client: "gtx" },
+  { host: "https://translate.google.com", client: "tw-ob" },
+  { host: "https://translate.googleapis.com", client: "tw-ob" },
+];
+const FREE_TTS_LIMIT = 180;
+
+export function splitForTts(text: string, limit = FREE_TTS_LIMIT): string[] {
+  const clean = text.trim();
+  if (clean.length <= limit) return [clean];
+
+  const chunks: string[] = [];
+  let current = "";
+
+  for (const word of clean.split(/\s+/)) {
+    if ((current + " " + word).trim().length > limit) {
+      if (current) chunks.push(current.trim());
+      current = word;
+    } else {
+      current = (current + " " + word).trim();
+    }
+  }
+  if (current) chunks.push(current.trim());
+  return chunks;
+}
+
+function freeTtsUrls(chunk: string, lang: string, rate: number, index: number, total: number): string[] {
+  const tl = lang.startsWith("ar") ? "ar" : "en";
+  const speed = Math.min(1, Math.max(0.24, rate));
+  return FREE_TTS_ENDPOINTS.map(
+    ({ host, client }) =>
+      `${host}/translate_tts?ie=UTF-8&client=${client}&tl=${tl}&ttsspeed=${speed.toFixed(2)}` +
+      `&total=${total}&idx=${index}&textlen=${chunk.length}&q=${encodeURIComponent(chunk)}`
+  );
+}
+
+async function speakWithFreeTts(text: string, lang: string, rate: number): Promise<void> {
+  const chunks = splitForTts(text);
+  for (let i = 0; i < chunks.length; i++) {
+    await playSources(freeTtsUrls(chunks[i]!, lang, rate, i, chunks.length));
+  }
 }
 
 // ── Web Speech: اختيار أحسن صوت متاح ─────────────
@@ -108,8 +160,8 @@ export function hasArabicBrowserVoice(): boolean {
 
 // ── Web Speech (حل أخير) ────────────────────────
 function speakWithBrowser(text: string, lang: string, rate: number): Promise<void> {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return resolve();
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return reject(new Error("no-speech-api"));
 
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -122,19 +174,25 @@ function speakWithBrowser(text: string, lang: string, rate: number): Promise<voi
     if (voice) u.voice = voice;
 
     let settled = false;
-    const done = () => {
+    let spoke = false;
+
+    const finish = (ok: boolean) => {
       if (settled) return;
       settled = true;
       clearInterval(keepAlive);
-      resolve();
+      if (ok) resolve();
+      else reject(new Error("speech-failed"));
     };
 
-    u.onend = done;
-    u.onerror = done;
+    u.onstart = () => {
+      spoke = true;
+    };
+    u.onend = () => finish(true);
+    u.onerror = () => finish(false);
 
     // Chrome بيوقف الكلام الطويل — نبضة كل 8 ثواني
     const keepAlive = setInterval(() => {
-      if (!window.speechSynthesis.speaking) return done();
+      if (!window.speechSynthesis.speaking) return finish(spoke);
       window.speechSynthesis.pause();
       window.speechSynthesis.resume();
     }, 8000);
@@ -143,7 +201,7 @@ function speakWithBrowser(text: string, lang: string, rate: number): Promise<voi
     window.speechSynthesis.speak(u);
 
     // أمان: لو المتصفح مرجّعش onend
-    setTimeout(done, Math.max(4000, text.length * 160));
+    setTimeout(() => finish(spoke), Math.max(4000, text.length * 160));
   });
 }
 
@@ -161,34 +219,56 @@ export async function say(text: string, options: SayOptions = {}): Promise<Speec
   if (!payload) return "none";
 
   stopSpeech();
+  const only = options.engine;
 
   // 1) ملف صوت مُسجّل
-  if (options.audio) {
+  if (options.audio && (!only || only === "file")) {
     try {
       await playSources([options.audio], { rate: 1 });
       return "file";
     } catch {
-      /* نكمل للمحرك اللي بعده */
+      if (only) throw new Error("file-failed");
     }
   }
 
-  // 2) محرك TTS احترافي عبر السيرفر
-  try {
-    const status = await getTtsStatus();
-    if (status.enabled) {
-      const url = `/api/tts?text=${encodeURIComponent(payload)}&lang=${encodeURIComponent(
-        lang
-      )}&rate=${rate.toFixed(2)}`;
-      await playSources([url], { rate: 1 });
-      return "api";
+  // 2) محرك TTS احترافي عبر السيرفر (محتاج مفتاح)
+  if (!only || only === "api") {
+    try {
+      const status = await getTtsStatus();
+      if (status.enabled) {
+        const url = `/api/tts?text=${encodeURIComponent(payload)}&lang=${encodeURIComponent(
+          lang
+        )}&rate=${rate.toFixed(2)}`;
+        await playSources([url], { rate: 1 });
+        return "api";
+      }
+      if (only) throw new Error("api-not-configured");
+    } catch (err) {
+      if (only) throw err;
     }
-  } catch {
-    /* نكمل للمتصفح */
   }
 
-  // 3) صوت المتصفح
-  await speakWithBrowser(payload, lang.startsWith("ar") ? "ar-EG" : "en-US", rate);
-  return "browser";
+  // 3) المحرك المجاني — من غير أي مفتاح
+  if ((!only && settings.freeTts) || only === "free") {
+    try {
+      await speakWithFreeTts(payload, lang, rate);
+      return "free";
+    } catch (err) {
+      if (only) throw err;
+    }
+  }
+
+  // 4) صوت المتصفح
+  if (!only || only === "browser") {
+    try {
+      await speakWithBrowser(payload, lang.startsWith("ar") ? "ar-EG" : "en-US", rate);
+      return "browser";
+    } catch (err) {
+      if (only) throw err;
+    }
+  }
+
+  return "none";
 }
 
 export function stopSpeech(): void {
@@ -196,6 +276,80 @@ export function stopSpeech(): void {
   if (typeof window !== "undefined" && window.speechSynthesis) {
     window.speechSynthesis.cancel();
   }
+}
+
+// ────────────────────────────────────────────────
+//  تشخيص الصوت — بيقول بالظبط كل محرك شغال ولا لأ
+// ────────────────────────────────────────────────
+export interface EngineReport {
+  engine: SpeechEngine;
+  label: string;
+  ok: boolean;
+  detail: string;
+}
+
+/** بيختبر لو رابط صوت بيتحمّل فعلاً في المتصفح (من غير ما يشغّله) */
+function canLoadAudio(url: string, timeout = 7000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const a = new Audio();
+    let done = false;
+    const finish = (ok: boolean) => {
+      if (done) return;
+      done = true;
+      a.removeAttribute("src");
+      resolve(ok);
+    };
+    a.preload = "auto";
+    a.muted = true;
+    a.oncanplaythrough = () => finish(true);
+    a.onloadeddata = () => finish(true);
+    a.onerror = () => finish(false);
+    a.src = url;
+    a.load();
+    setTimeout(() => finish(false), timeout);
+  });
+}
+
+export async function diagnoseAudio(): Promise<EngineReport[]> {
+  const reports: EngineReport[] = [];
+
+  // 1) المحرك الاحترافي
+  const status = await getTtsStatus();
+  reports.push({
+    engine: "api",
+    label: "محرك احترافي (مفتاح API)",
+    ok: status.enabled,
+    detail: status.enabled ? `مفعّل — ${status.provider}` : "مفيش مفتاح في .env.local",
+  });
+
+  // 2) المحرك المجاني
+  const freeUrl = freeTtsUrls("بَاء", "ar", 0.9, 0, 1)[0]!;
+  const freeOk = await canLoadAudio(freeUrl);
+  reports.push({
+    engine: "free",
+    label: "المحرك المجاني (Google Translate)",
+    ok: freeOk,
+    detail: freeOk ? "شغّال — مش محتاج أي إعداد" : "متحجوب على الشبكة دي",
+  });
+
+  // 3) صوت المتصفح
+  const voices = listArabicVoices();
+  reports.push({
+    engine: "browser",
+    label: "صوت المتصفح (Web Speech)",
+    ok: voices.length > 0,
+    detail:
+      voices.length > 0
+        ? `${voices.length} صوت عربي — ${voices[0]!.name}`
+        : "مفيش أي صوت عربي مثبّت في الجهاز",
+  });
+
+  return reports;
+}
+
+/** اختبار تلاوة القرآن (CDN) */
+export async function diagnoseQuranAudio(url: string): Promise<boolean> {
+  return canLoadAudio(url, 9000);
 }
 
 // ── توافق مع الكود القديم ───────────────────────

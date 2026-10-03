@@ -3,8 +3,16 @@
 import { useEffect, useState } from "react";
 import { Moon, Settings, Sun, X } from "lucide-react";
 import useSettings from "@/hooks/useSettings";
-import { RECITERS } from "@/lib/quranAudio";
-import { getTtsStatus, listArabicVoices, say } from "@/lib/speech";
+import { ayahAudioUrl, RECITERS } from "@/lib/quranAudio";
+import {
+  diagnoseAudio,
+  diagnoseQuranAudio,
+  getTtsStatus,
+  listArabicVoices,
+  say,
+  type EngineReport,
+  type SpeechEngine,
+} from "@/lib/speech";
 import { sfxCorrect, unlockAudio } from "@/lib/sfx";
 
 const PROVIDER_LABEL: Record<string, string> = {
@@ -12,7 +20,15 @@ const PROVIDER_LABEL: Record<string, string> = {
   azure: "Azure Speech",
   elevenlabs: "ElevenLabs",
   openai: "OpenAI",
-  none: "صوت المتصفح",
+  none: "مش مفعّل",
+};
+
+const ENGINE_LABEL: Record<SpeechEngine, string> = {
+  file: "ملف مسجّل",
+  api: "محرك احترافي",
+  free: "المحرك المجاني",
+  browser: "صوت المتصفح",
+  none: "مفيش صوت",
 };
 
 export default function SettingsSheet() {
@@ -20,6 +36,31 @@ export default function SettingsSheet() {
   const [open, setOpen] = useState(false);
   const [tts, setTts] = useState<{ enabled: boolean; provider: string } | null>(null);
   const [arVoices, setArVoices] = useState(0);
+  const [reports, setReports] = useState<EngineReport[] | null>(null);
+  const [quranOk, setQuranOk] = useState<boolean | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [lastEngine, setLastEngine] = useState<string | null>(null);
+
+  const runDiagnostics = async () => {
+    setChecking(true);
+    setReports(null);
+    setQuranOk(null);
+    try {
+      const [engines, quran] = await Promise.all([
+        diagnoseAudio(),
+        diagnoseQuranAudio(ayahAudioUrl(112, 1, settings.reciter)),
+      ]);
+      setReports(engines);
+      setQuranOk(quran);
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const testVoice = async () => {
+    const used = await say("مَرحَبًا بِك في رَوضَةِ النُّجوم");
+    setLastEngine(ENGINE_LABEL[used] ?? used);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -124,24 +165,79 @@ export default function SettingsSheet() {
                 />
               </div>
 
-              <button
-                onClick={() => void say("مَرحَبًا بِك في رَوضَةِ النُّجوم")}
-                className="w-full rounded-2xl bg-violet-600 py-2.5 text-sm font-bold text-white transition active:scale-95"
-              >
-                🔊 جرّب الصوت
-              </button>
+              <label className="mb-3 flex items-center justify-between gap-3 text-sm font-bold text-gray-700 dark:text-gray-200">
+                <span>
+                  المحرك المجاني
+                  <span className="block text-xs font-normal text-gray-500">
+                    نطق عربي أوضح بكتير من صوت المتصفح — من غير أي مفتاح
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={settings.freeTts}
+                  onChange={(e) => update({ freeTts: e.target.checked })}
+                  className="h-5 w-5 flex-shrink-0 accent-violet-600"
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => void testVoice()}
+                  className="rounded-2xl bg-violet-600 py-2.5 text-sm font-bold text-white transition active:scale-95"
+                >
+                  🔊 جرّب الصوت
+                </button>
+                <button
+                  onClick={() => void runDiagnostics()}
+                  disabled={checking}
+                  className="rounded-2xl bg-white py-2.5 text-sm font-bold text-violet-700 shadow-sm ring-1 ring-violet-200 transition active:scale-95 disabled:opacity-60 dark:bg-white/10 dark:text-violet-200 dark:ring-white/10"
+                >
+                  {checking ? "⏳ بيفحص..." : "🩺 افحص الصوت"}
+                </button>
+              </div>
+
+              {lastEngine && (
+                <p className="mt-2 text-center text-xs font-bold text-emerald-600 dark:text-emerald-300">
+                  اتشغّل بـ: {lastEngine}
+                </p>
+              )}
+
+              {reports && (
+                <div className="mt-3 space-y-1.5">
+                  {reports.map((r) => (
+                    <div
+                      key={r.engine}
+                      className="flex items-start justify-between gap-2 rounded-2xl bg-white p-2.5 text-xs dark:bg-white/5"
+                    >
+                      <span className="font-bold text-gray-700 dark:text-gray-100">{r.label}</span>
+                      <span className="flex-shrink-0 text-left">
+                        <span className={r.ok ? "text-emerald-600" : "text-red-500"}>{r.ok ? "✅" : "❌"}</span>
+                        <span className="block text-[11px] text-gray-500 dark:text-gray-400">{r.detail}</span>
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between gap-2 rounded-2xl bg-white p-2.5 text-xs dark:bg-white/5">
+                    <span className="font-bold text-gray-700 dark:text-gray-100">تلاوة القرآن (CDN)</span>
+                    <span className={quranOk ? "text-emerald-600" : "text-red-500"}>
+                      {quranOk === null ? "—" : quranOk ? "✅ شغّالة" : "❌ متحجوبة"}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="mt-3 rounded-2xl bg-white p-3 text-xs leading-6 text-gray-500 dark:bg-white/5 dark:text-gray-300">
-                المحرك الحالي:{" "}
+                مفتاح TTS احترافي:{" "}
                 <strong className="text-violet-600 dark:text-violet-300">
                   {PROVIDER_LABEL[tts?.provider ?? "none"] ?? tts?.provider}
                 </strong>
                 {!tts?.enabled && (
                   <>
                     <br />
-                    {arVoices > 0
-                      ? `المتصفح عنده ${arVoices} صوت عربي. لجودة أعلى بكتير ضيف مفتاح TTS في .env.local`
-                      : "⚠️ مفيش صوت عربي مثبّت في المتصفح — ضيف مفتاح TTS في .env.local عشان النطق يبقى سليم"}
+                    {settings.freeTts
+                      ? "شغّال دلوقتي بالمحرك المجاني. لأعلى جودة ممكنة ضيف مفتاح في .env.local"
+                      : arVoices > 0
+                        ? `المتصفح عنده ${arVoices} صوت عربي فقط — شغّل المحرك المجاني فوق`
+                        : "⚠️ مفيش صوت عربي في جهازك — شغّل المحرك المجاني فوق"}
                   </>
                 )}
               </div>
