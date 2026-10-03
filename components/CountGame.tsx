@@ -2,6 +2,8 @@
 import { useState, useMemo } from "react";
 import type { CountItem } from "@/types";
 import ProgressBar from "./ProgressBar";
+import { sfxCorrect, sfxWrong, sfxWin, unlockAudio } from "@/lib/sfx";
+import { say } from "@/lib/speech";
 
 interface Props {
   items: CountItem[];
@@ -23,8 +25,15 @@ export default function CountGame({ items, onComplete }: Props) {
 
   const handlePick = (val: number) => {
     if (picked !== null) return;
+    unlockAudio();
     setPicked(val);
-    if (val === item.count) setCorrect((c) => c + 1);
+    if (val === item.count) {
+      setCorrect((c) => c + 1);
+      sfxCorrect();
+    } else {
+      sfxWrong();
+    }
+    setTimeout(() => void say(`العدد ${item.count}`), 600);
   };
 
   const next = () => {
@@ -34,6 +43,7 @@ export default function CountGame({ items, onComplete }: Props) {
       const finalCorrect  = correct + isLastCorrect;
       const pct   = finalCorrect / total;
       const stars = pct >= 0.9 ? 3 : pct >= 0.6 ? 2 : 1;
+      sfxWin();
       onComplete(stars);
     } else {
       setIndex(nextIdx);

@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import type { QuizItem } from "@/types";
 import SpeakButton from "./SpeakButton";
 import ProgressBar from "./ProgressBar";
-import { speakAuto, detectLang } from "@/lib/speech";
+import { say, detectLang, stopSpeech } from "@/lib/speech";
+import { getSettings } from "@/lib/settings";
+import { sfxCorrect, sfxWrong, sfxWin, unlockAudio } from "@/lib/sfx";
 
 interface Props {
   items: QuizItem[];
@@ -21,23 +23,41 @@ export default function Quiz({ items, onComplete }: Props) {
 
   // ── Auto-speak question when it changes ───────
   useEffect(() => {
+    if (!getSettings().autoPlay) return;
     const timer = setTimeout(() => {
-      speakAuto(item.question);
+      void say(item.speech ?? item.question, { audio: item.audio });
     }, 400);
     return () => clearTimeout(timer);
-  }, [index, item.question]);
+  }, [index, item.question, item.speech, item.audio]);
+
+  useEffect(() => () => stopSpeech(), []);
 
   const handleAnswer = (i: number) => {
     if (answered) return;
+    unlockAudio();
     setSelected(i);
-    if (i === item.correctIndex) setCorrect((c) => c + 1);
+
+    if (i === item.correctIndex) {
+      setCorrect((c) => c + 1);
+      sfxCorrect();
+    } else {
+      sfxWrong();
+    }
+
+    // ننطق الإجابة الصحيحة عشان الطفل يسمعها صح
+    const answerText = item.options[item.correctIndex];
+    if (answerText) {
+      setTimeout(() => void say(answerText, { lang: detectLang(answerText) }), 650);
+    }
   };
 
   const next = () => {
     const nextIdx = index + 1;
+    stopSpeech();
     if (nextIdx >= total) {
-      const pct = (correct + (selected === item.correctIndex ? 1 : 0)) / total;
+      const pct = correct / total;
       const stars = pct >= 0.9 ? 3 : pct >= 0.6 ? 2 : 1;
+      sfxWin();
       onComplete(stars);
     } else {
       setIndex(nextIdx);

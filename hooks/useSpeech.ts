@@ -1,54 +1,51 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { speakAuto, isSpeechAvailable, speak, type SpeechLang } from "@/lib/speech";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { say, stopSpeech, warmUpVoices, getTtsStatus, type SayOptions, type SpeechEngine } from "@/lib/speech";
 
 export function useSpeech() {
   const [available, setAvailable] = useState(false);
-  const [speaking,  setSpeaking]  = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [speaking, setSpeaking] = useState(false);
+  const [engine, setEngine] = useState<SpeechEngine | null>(null);
+  const mounted = useRef(true);
+  const runId = useRef(0);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-
-    const init = () => {
-      // Chrome يحتاج getVoices() يتسمى مرة عشان يلود الأصوات
-      window.speechSynthesis.getVoices();
-      setAvailable(true);
-    };
-
-    init();
-
-    // Chrome بيطلق onvoiceschanged بعد شوية
-    window.speechSynthesis.onvoiceschanged = init;
+    mounted.current = true;
+    setAvailable(true);
+    warmUpVoices();
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = warmUpVoices;
+    }
+    void getTtsStatus();
 
     return () => {
-      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = null;
-      if (timerRef.current) clearTimeout(timerRef.current);
+      mounted.current = false;
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+      stopSpeech();
     };
   }, []);
 
-  const say = (text: string, lang?: SpeechLang) => {
-    if (!isSpeechAvailable()) return;
-
-    // وقف أي كلام شغال
-    window.speechSynthesis.cancel();
-    if (timerRef.current) clearTimeout(timerRef.current);
-
+  const speakText = useCallback(async (text: string, options?: SayOptions) => {
+    const id = ++runId.current;
     setSpeaking(true);
+    try {
+      const used = await say(text, options);
+      if (mounted.current && id === runId.current) setEngine(used);
+    } finally {
+      if (mounted.current && id === runId.current) setSpeaking(false);
+    }
+  }, []);
 
-    if (lang) speak(text, lang);
-    else speakAuto(text);
+  const stop = useCallback(() => {
+    runId.current += 1;
+    stopSpeech();
+    if (mounted.current) setSpeaking(false);
+  }, []);
 
-    // تقدير مدة الكلام (حرف ≈ 80ms)
-    const duration = Math.max(1000, text.length * 80);
-    timerRef.current = setTimeout(() => setSpeaking(false), duration);
-  };
-
-  const stop = () => {
-    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setSpeaking(false);
-  };
-
-  return { available, speaking, say, stop };
+  return { available, speaking, engine, say: speakText, stop };
 }
+
+export default useSpeech;

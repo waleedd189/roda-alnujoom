@@ -4,7 +4,19 @@
 
 :root {
   --font-tajawal: "Tajawal", "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-quran: "Amiri Quran", "Scheherazade New", "Traditional Arabic", "Times New Roman", serif;
   --surface: rgba(255, 255, 255, 0.82);
+  --page-bg: #fff9f0;
+  --glow-a: rgba(196, 181, 253, 0.45);
+  --glow-b: rgba(253, 224, 71, 0.28);
+}
+
+html.dark {
+  --surface: rgba(30, 27, 48, 0.78);
+  --page-bg: #070711;
+  --glow-a: rgba(109, 40, 217, 0.4);
+  --glow-b: rgba(217, 119, 6, 0.18);
+  color-scheme: dark;
 }
 
 * {
@@ -21,9 +33,14 @@ html {
 body {
   font-family: var(--font-tajawal), sans-serif;
   background:
-    radial-gradient(circle at top right, rgba(196, 181, 253, 0.45), transparent 32rem),
-    radial-gradient(circle at bottom left, rgba(253, 224, 71, 0.28), transparent 28rem),
-    #fff9f0;
+    radial-gradient(circle at top right, var(--glow-a), transparent 32rem),
+    radial-gradient(circle at bottom left, var(--glow-b), transparent 28rem),
+    var(--page-bg);
+  transition: background-color 0.3s ease;
+}
+
+.font-quran {
+  font-family: var(--font-quran);
 }
 
 button,
@@ -31,7 +48,7 @@ a {
   touch-action: manipulation;
 }
 
-/* Custom animations */
+/* ── Animations ──────────────────────────────── */
 @keyframes spin-once {
   0%   { transform: rotate(0deg) scale(0.5); opacity: 0; }
   60%  { transform: rotate(380deg) scale(1.1); }
@@ -60,16 +77,40 @@ a {
   100% { transform: translateX(-140%) rotate(12deg); }
 }
 
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(115vh) rotate(540deg); opacity: 0; }
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.45); }
+  70%  { box-shadow: 0 0 0 18px rgba(124, 58, 237, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+}
+
 .animate-spin-once { animation: spin-once 0.6s ease-out forwards; }
 .animate-bounce-in { animation: bounce-in 0.4s ease-out forwards; }
 .animate-shake     { animation: shake 0.35s ease-in-out; }
 .animate-float     { animation: float-soft 3s ease-in-out infinite; }
+.animate-ring      { animation: pulse-ring 1.6s ease-out infinite; }
+
+.confetti-piece {
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
 
 .glass-card {
   background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.75);
   box-shadow: 0 18px 50px rgba(124, 58, 237, 0.12);
   backdrop-filter: blur(14px);
+}
+
+html.dark .glass-card {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
 }
 
 .shine-overlay::after {
@@ -85,7 +126,48 @@ a {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
-/* Hide scrollbar on mobile for cleaner look */
 ::-webkit-scrollbar       { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 2px; }
+
+/* ────────────────────────────────────────────────
+   الوضع الليلي
+   الصفحات القديمة مكتوبة بألوان فاتحة ثابتة،
+   فبنعمل تحويل عام هنا بدل ما نعدّل كل ملف.
+   ──────────────────────────────────────────────── */
+html.dark .bg-white            { background-color: #16162a !important; }
+html.dark .bg-gray-50          { background-color: #12121f !important; }
+html.dark .bg-gray-100         { background-color: #1d1d33 !important; }
+html.dark .bg-violet-50        { background-color: rgba(139, 92, 246, 0.12) !important; }
+html.dark .bg-amber-50         { background-color: rgba(245, 158, 11, 0.12) !important; }
+html.dark .bg-emerald-50       { background-color: rgba(16, 185, 129, 0.12) !important; }
+html.dark .bg-sky-50           { background-color: rgba(14, 165, 233, 0.12) !important; }
+html.dark .bg-rose-50          { background-color: rgba(244, 63, 94, 0.12) !important; }
+html.dark .bg-red-50           { background-color: rgba(239, 68, 68, 0.12) !important; }
+html.dark .bg-purple-50        { background-color: rgba(168, 85, 247, 0.12) !important; }
+html.dark .bg-green-100        { background-color: rgba(34, 197, 94, 0.18) !important; }
+html.dark .bg-red-100          { background-color: rgba(239, 68, 68, 0.18) !important; }
+html.dark .bg-purple-100       { background-color: rgba(168, 85, 247, 0.2) !important; }
+html.dark .bg-violet-100       { background-color: rgba(139, 92, 246, 0.2) !important; }
+html.dark .bg-amber-100        { background-color: rgba(245, 158, 11, 0.2) !important; }
+
+html.dark .text-gray-900,
+html.dark .text-gray-800       { color: #f1f5f9 !important; }
+html.dark .text-gray-700       { color: #e2e8f0 !important; }
+html.dark .text-gray-600       { color: #cbd5e1 !important; }
+html.dark .text-gray-500       { color: #a9b4c4 !important; }
+html.dark .text-gray-400       { color: #8d97a8 !important; }
+html.dark .text-gray-300       { color: #6b7686 !important; }
+html.dark .text-green-800      { color: #86efac !important; }
+html.dark .text-red-800        { color: #fca5a5 !important; }
+html.dark .text-amber-900      { color: #fcd34d !important; }
+html.dark .text-emerald-800    { color: #6ee7b7 !important; }
+
+html.dark .border-gray-200     { border-color: rgba(255, 255, 255, 0.12) !important; }
+html.dark .border-white        { border-color: rgba(255, 255, 255, 0.08) !important; }
+html.dark .ring-gray-100,
+html.dark .ring-gray-200       { --tw-ring-color: rgba(255, 255, 255, 0.12) !important; }
+html.dark .ring-violet-100     { --tw-ring-color: rgba(139, 92, 246, 0.25) !important; }
+
+/* البطاقات الملوّنة (inline style) تفضل ملونة بس بإضاءة أهدى */
+html.dark .flash-card-surface  { filter: brightness(0.82) saturate(0.92); }
