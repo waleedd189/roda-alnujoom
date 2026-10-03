@@ -3,6 +3,8 @@ import { useState } from "react";
 import type { FillItem } from "@/types";
 import ProgressBar from "./ProgressBar";
 import SpeakButton from "./SpeakButton";
+import { sfxCorrect, sfxWrong, sfxWin, unlockAudio } from "@/lib/sfx";
+import { say } from "@/lib/speech";
 
 interface Props {
   items: FillItem[];
@@ -23,8 +25,15 @@ export default function FillGame({ items, onComplete }: Props) {
 
   const handlePick = (opt: string) => {
     if (picked) return;
+    unlockAudio();
     setPicked(opt);
-    if (opt === item.answer) setCorrect((c) => c + 1);
+    if (opt === item.answer) {
+      setCorrect((c) => c + 1);
+      sfxCorrect();
+    } else {
+      sfxWrong();
+    }
+    setTimeout(() => void say(item.sentence.replace("___", item.answer)), 700);
   };
 
   const next = () => {
@@ -33,6 +42,7 @@ export default function FillGame({ items, onComplete }: Props) {
       const isLastCorrect = picked === item.answer ? 1 : 0;
       const pct   = (correct + isLastCorrect) / total;
       const stars = pct >= 0.9 ? 3 : pct >= 0.6 ? 2 : 1;
+      sfxWin();
       onComplete(stars);
     } else {
       setIndex(nextIdx);

@@ -1,6 +1,9 @@
 "use client";
 import { useState, useMemo } from "react";
 import type { MatchPair } from "@/types";
+import { sfxCorrect, sfxWrong, sfxWin, unlockAudio } from "@/lib/sfx";
+import { say } from "@/lib/speech";
+import { hasArabic } from "@/lib/arabicText";
 
 interface Props {
   pairs: MatchPair[];
@@ -25,6 +28,10 @@ export default function MatchGame({ pairs, onComplete }: Props) {
 
   const handleClick = (side: Side, value: string) => {
     if (matched.has(value)) return;
+    unlockAudio();
+
+    // نطق الحرف/الكلمة عند الضغط — الطفل يسمع وينطق
+    if (hasArabic(value) || /^[A-Za-z]/.test(value)) void say(value);
 
     if (!selected) {
       setSelected({ side, value });
@@ -46,11 +53,14 @@ export default function MatchGame({ pairs, onComplete }: Props) {
       const next = new Set([...Array.from(matched), leftVal, rightVal]);
       setMatched(next);
       setSelected(null);
+      sfxCorrect();
       if (next.size === pairs.length * 2) {
         const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
+        sfxWin();
         setTimeout(() => onComplete(stars), 500);
       }
     } else {
+      sfxWrong();
       setMistakes((m) => m + 1);
       setFlash(value);
       setTimeout(() => { setFlash(null); setSelected(null); }, 600);

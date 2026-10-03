@@ -15,6 +15,12 @@ export interface FlashCardItem {
   color: string;       // tailwind bg class or hex
   audio?: string;      // optional audio file path in /public/audio/
   example?: string;    // example sentence
+  /** نص بديل يُرسل لمحرك النطق لو الكتابة بتلخبطه */
+  speech?: string;
+  /** رقم السورة — لو موجود هنشغّل تلاوة قارئ حقيقي بدل الصوت الآلي */
+  surah?: number;
+  /** رقم الآية داخل السورة */
+  ayah?: number;
 }
 
 // ── Quiz ───────────────────────────────────────
@@ -25,6 +31,7 @@ export interface QuizItem {
   correctIndex: number;
   explanation?: string;  // shown after answering
   audio?: string;
+  speech?: string;       // نص بديل للنطق
 }
 
 // ── Match ──────────────────────────────────────

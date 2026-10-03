@@ -7,6 +7,8 @@ import { ChevronLeft, Home, RotateCcw, Sparkles } from "lucide-react";
 import { subjects } from "@/data";
 import { useProgress } from "@/hooks/useProgress";
 import FlashCard from "@/components/FlashCard";
+import QuranPlayer from "@/components/QuranPlayer";
+import Confetti from "@/components/Confetti";
 import Quiz from "@/components/Quiz";
 import MatchGame from "@/components/MatchGame";
 import CountGame from "@/components/CountGame";
@@ -45,6 +47,11 @@ function isAgeGroup(value: string | null): value is AgeGroup {
   return value === "5-6" || value === "7-8" || value === "9-10" || value === "11-12";
 }
 
+/** الدرس ده آيات قرآنية؟ (كل بطاقاته عليها رقم سورة وآية) */
+function isQuranRecitation(items: FlashCardItem[]): boolean {
+  return items.length > 0 && items.every((item) => Boolean(item.surah && item.ayah));
+}
+
 function LessonPageInner({ subject, lessonId }: { subject: string; lessonId: string }) {
   const searchParams = useSearchParams();
   const ageParam = searchParams.get("age");
@@ -81,6 +88,7 @@ function LessonPageInner({ subject, lessonId }: { subject: string; lessonId: str
 
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-8 text-center" dir="rtl">
+        <Confetti />
         <div className="glass-card w-full max-w-xl rounded-[2.5rem] p-6 sm:p-8 overflow-hidden relative">
           <div className="absolute -top-12 -left-10 text-[9rem] opacity-10">⭐</div>
           <span className="text-8xl animate-spin-once block mb-4">🏆</span>
@@ -152,9 +160,13 @@ function LessonPageInner({ subject, lessonId }: { subject: string; lessonId: str
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-5 safe-bottom">
         <div className="glass-card rounded-[2rem] p-4 sm:p-6">
-          {lesson.type === "flashcard" && (
-            <FlashCard items={lesson.data as FlashCardItem[]} onComplete={handleComplete} />
-          )}
+          {lesson.type === "flashcard" &&
+            (isQuranRecitation(lesson.data as FlashCardItem[]) ? (
+              // آيات قرآنية → مشغّل تلاوة بصوت قارئ حقيقي (مش صوت آلي)
+              <QuranPlayer items={lesson.data as FlashCardItem[]} onComplete={handleComplete} />
+            ) : (
+              <FlashCard items={lesson.data as FlashCardItem[]} onComplete={handleComplete} />
+            ))}
           {lesson.type === "quiz" && (
             <Quiz items={lesson.data as QuizItem[]} onComplete={handleComplete} />
           )}
